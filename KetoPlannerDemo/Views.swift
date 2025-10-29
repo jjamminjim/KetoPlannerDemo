@@ -1,4 +1,3 @@
-
 import SwiftUI
 import SwiftData
 
@@ -62,6 +61,15 @@ struct ChatView: View {
                     .textFieldStyle(.roundedBorder)
                     .lineLimit(1...4)
                     .disabled(isBusy)
+                Button {
+                    draft = "netcarbs 30 8 6"
+                } label: {
+                    Label("Example", systemImage: "testtube.2")
+                        .labelStyle(.iconOnly)
+                }
+                .buttonStyle(.bordered)
+                .help("Insert example: netcarbs 30 8 6")
+                .disabled(isBusy)
                 Button(isBusy ? "…" : "Send") { send() }
                     .buttonStyle(.borderedProminent)
                     .disabled(isBusy || draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -70,6 +78,24 @@ struct ChatView: View {
         }
     }
 
+    /*
+     [TP] User request flow — send()
+     
+     This function validates the user's input, persists the user's message to SwiftData,
+     and then asynchronously obtains an assistant reply.
+     
+     It attempts to parse a directive via `parseNetCarbDirective` to detect a special command
+     in the form `netcarbs <total> <fiber> <polyols>`.
+     
+     When the directive is present, it computes net carbs locally (calling the C/C++ bridge function through Swift)
+     and then calls `AI.complete(...)` with a prompt that incorporates the computed value to steer the model.
+     
+     When the directive is absent, it forwards the raw input to `AI.complete`.
+     
+     It persists the assistant's response to the same thread and handles errors by updating `errorText`.
+     
+     Note that `AI.complete` is an actor method that may run concurrently and perform on‑device inference via FoundationModels.
+    */
     private func send() {
         guard let thread = activeThread else { return }
         let input = draft.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -89,9 +115,12 @@ struct ChatView: View {
             errorText = "Save failed: \(error.localizedDescription)"
         }
 
+        // Model interaction happens off the main actor; isBusy gates the UI.
         Task {
             do {
+                // Check for the special `netcarbs` directive to do local computation + guided prompt.
                 if let calc = parseNetCarbDirective(input) {
+                    // Compute net carbs locally and format it for the prompt.
                     let net = NetCarbsFromTotal(calc.total, calc.fiber, calc.polyols)
                     let reply = """
                     Using your inputs: total=\(calc.total)g, fiber=\(calc.fiber)g, polyols=\(calc.polyols)g → net=\(String(format: "%.1f", net))g.
@@ -99,6 +128,7 @@ struct ChatView: View {
                     """
                     persistAssistant(reply, in: thread)
                 } else {
+                    // Invoke the on‑device language model with the user’s raw text.
                     let reply = try await AI.complete(input)
                     persistAssistant(reply, in: thread)
                 }
@@ -109,6 +139,7 @@ struct ChatView: View {
         }
     }
 
+    // Persist the assistant message and save the thread.
     private func persistAssistant(_ text: String, in thread: ChatThread) {
         let a = AssistantMessage(text: text)
         thread.messages.append(a)
@@ -224,7 +255,22 @@ struct HistoryView: View {
     }
 }
 
-// MARK: - Small directive parser
+/*
+ [TP] Directive parser — parseNetCarbDirective()
+ 
+ Expected syntax: `netcarbs <total> <fiber> <polyols>` with space-separated numeric values in grams.
+ 
+ Returns a tuple when parsing succeeds; otherwise returns `nil` and the input is treated as a normal chat.
+ 
+ This parser enables a hybrid flow: local numeric computation first, then a model prompt seeded with the computed result
+ for more deterministic, concise answers.
+
+ Example:
+ Input:  "netcarbs 30 8 6"
+ Parsed: total=30, fiber=8, polyols=6
+ Computed net (via NetCarbsFromTotal): 30 - 8 - 0.5*6 = 19g
+*/
+
 private func parseNetCarbDirective(_ s: String) -> (total: Double, fiber: Double, polyols: Double)? {
     let parts = s.split(separator: " ")
     guard parts.count == 4, parts[0].lowercased() == "netcarbs",
@@ -233,3 +279,4 @@ private func parseNetCarbDirective(_ s: String) -> (total: Double, fiber: Double
     }
     return (t, f, p)
 }
+
