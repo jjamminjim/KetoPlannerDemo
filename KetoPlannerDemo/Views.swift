@@ -210,7 +210,7 @@ struct MessageList: View {
         
         thread = try? modelContext.fetch(descriptor).first
         
-        debugPrint("MessageList.loadThread", thread?.chatID, thread?.title)
+        debugPrint("MessageList.loadThread", String(describing: thread?.chatID), String(describing: thread?.title))
 
     }
 
