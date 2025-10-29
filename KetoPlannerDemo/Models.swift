@@ -16,6 +16,13 @@ final class ChatThread {
     }
 }
 
+protocol MessageItem {
+    var messageID: UUID { get }
+    var text: String { get }
+    var createdAt: Date { get }
+    var userMessage: Bool { get }
+}
+
 @available(iOS 26, *)
 @Model class BaseMessage {
     #Index<BaseMessage>([\.messageID])
@@ -25,32 +32,34 @@ final class ChatThread {
 
     var text: String
     var createdAt: Date
-    var userMessage: Bool
 
-    init(id: UUID = .init(), text: String, userMessage: Bool, createdAt: Date = .now) {
+    fileprivate init(id: UUID, text: String, createdAt: Date) {
         self.messageID = id
         self.text = text
-        self.userMessage = userMessage
         self.createdAt = createdAt
     }
 }
 
-//@available(iOS 26, *)
-//@Model final class UserMessage: BaseMessage {
-//    override init(id: UUID = .init(), text: String, createdAt: Date = .now) {
-//        responseCount = 0
-//        super.init(id: id, text: text, createdAt: createdAt)
-//    }
-//    
-//    var responseCount: Int
-//}
-//
-//@available(iOS 26, *)
-//@Model final class AssistantMessage: BaseMessage {
-//    override init(id: UUID = .init(), text: String, createdAt: Date = .now) {
-//        responseCount = 0
-//        super.init(id: id, text: text, createdAt: createdAt)
-//    }
-//    
-//    var responseCount: Int
-//}
+extension BaseMessage: MessageItem {
+    @Transient @objc var userMessage: Bool {
+        fatalError("userMessage getter must be implemented in subclass")
+    }
+}
+
+@available(iOS 26, *)
+@Model final class UserMessage: BaseMessage {
+    override init(id: UUID = .init(), text: String, createdAt: Date = .now) {
+        super.init(id: id, text: text, createdAt: createdAt)
+    }
+    
+    override var userMessage: Bool { true }
+}
+
+@available(iOS 26, *)
+@Model final class AssistantMessage: BaseMessage {
+    override init(id: UUID = .init(), text: String, createdAt: Date = .now) {
+        super.init(id: id, text: text, createdAt: createdAt)
+    }
+    
+    override var userMessage: Bool { false }
+}

@@ -76,7 +76,7 @@ struct ChatView: View {
         guard !input.isEmpty else { return }
         draft = ""; errorText = nil; isBusy = true
 
-        let msg = BaseMessage(text: input, userMessage: true)
+        let msg = UserMessage(text: input)
         thread.messages.append(msg)
         modelContext.insert(msg)
         
@@ -110,7 +110,7 @@ struct ChatView: View {
     }
 
     private func persistAssistant(_ text: String, in thread: ChatThread) {
-        let a = BaseMessage(text: text, userMessage: false)
+        let a = AssistantMessage(text: text)
         thread.messages.append(a)
         modelContext.insert(a)
         do { try modelContext.save() } catch { errorText = "Save failed: \(error.localizedDescription)" }
@@ -141,7 +141,7 @@ struct MessageList: View {
     let threadID: UUID
 
     @State private var thread: ChatThread?
-
+    
     var body: some View {
         Group {
             if let thread {
@@ -150,14 +150,14 @@ struct MessageList: View {
                         LazyVStack(alignment: .leading, spacing: 12) {
                             ForEach(thread.messages.sorted(by: { $0.createdAt < $1.createdAt })) { msg in
                                 messageView(for: msg)
-                                    .id(msg.id)
+                                    .id(msg.messageID)
                             }
                         }
                         .padding()
                     }
                     .onChange(of: thread.messages.count) { _, _ in
                         if let last = thread.messages.sorted(by: { $0.createdAt < $1.createdAt }).last {
-                            withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
+                            withAnimation { proxy.scrollTo(last.messageID, anchor: .bottom) }
                         }
                     }
                 }
@@ -184,7 +184,7 @@ struct MessageList: View {
     }
 
     @ViewBuilder
-    private func messageView(for msg: BaseMessage) -> some View {
+    private func messageView(for msg: MessageItem) -> some View {
         let text = msg.text
         let isUserMessage = msg.userMessage
         
@@ -209,6 +209,7 @@ struct HistoryView: View {
                 LabeledContent("Messages", value: "\(thread.messages.count)")
                 LabeledContent("Created", value: thread.createdAt.formatted())
             }
+            
             Section("Messages") {
                 ForEach(thread.messages.sorted(by: { $0.createdAt < $1.createdAt })) { m in
                     VStack(alignment: .leading, spacing: 6) {
