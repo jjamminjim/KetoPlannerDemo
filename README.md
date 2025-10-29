@@ -3,7 +3,7 @@
 
 A minimal, local-only SwiftUI demo using **Foundation Models** (on-device), **SwiftData with Model Inheritance**, **C++ Interop**, and **modern Swift concurrency** (`actor`, `nonisolated`, and optional `@concurrent`).
 
-This starter kit is designed for teh ICSCon 2025 conference demo. It can be used as a starting point **iOS App** project in Xcode.
+This starter kit is designed for the ICSCon 2025 conference demo. It can be used as a starting point **iOS App** project in Xcode.
 
 ---
 
