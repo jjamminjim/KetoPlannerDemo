@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		7CED8BE52EB29BB00015629B /* FoundationModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7CED8BE42EB29BB00015629B /* FoundationModels.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		7C59D5482EB029C9007A433D /* KetoPlannerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KetoPlannerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7CED8BE42EB29BB00015629B /* FoundationModels.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FoundationModels.framework; path = System/Library/Frameworks/FoundationModels.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +28,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7CED8BE52EB29BB00015629B /* FoundationModels.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +39,7 @@
 			isa = PBXGroup;
 			children = (
 				7C59D54A2EB029C9007A433D /* KetoPlannerDemo */,
+				7CED8BE32EB29BB00015629B /* Frameworks */,
 				7C59D5492EB029C9007A433D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +50,14 @@
 				7C59D5482EB029C9007A433D /* KetoPlannerDemo.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7CED8BE32EB29BB00015629B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7CED8BE42EB29BB00015629B /* FoundationModels.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
