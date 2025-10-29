@@ -60,27 +60,3 @@ final class ChatThread {
         self.createdAt = createdAt
     }
 }
-
-/*
-[TP] Commented subclasses demonstrate optional inheritance/polymorphism usage in newer OS versions.
-*/
-
-//@available(iOS 26, *)
-//@Model final class UserMessage: BaseMessage {
-//    override init(id: UUID = .init(), text: String, createdAt: Date = .now) {
-//        responseCount = 0
-//        super.init(id: id, text: text, createdAt: createdAt)
-//    }
-//    
-//    var responseCount: Int
-//}
-//
-//@available(iOS 26, *)
-//@Model final class AssistantMessage: BaseMessage {
-//    override init(id: UUID = .init(), text: String, createdAt: Date = .now) {
-//        responseCount = 0
-//        super.init(id: id, text: text, createdAt: createdAt)
-//    }
-//    
-//    var responseCount: Int
-//}
